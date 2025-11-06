@@ -215,6 +215,97 @@ export async function addWatermarkToVideo(
 }
 
 /**
+ * 将视频缩放为1:1正方形尺寸（保持宽高比，添加黑边，支持静音）
+ * 不裁剪画面，缩放到最小边，保留完整内容
+ *
+ * @param videoUrl - 原始视频 URL
+ * @param size - 目标尺寸（正方形边长，默认1080）
+ * @param mute - 是否静音（默认true）
+ * @param onProgress - 进度回调 (0-100)
+ * @returns 处理后的视频 Blob URL
+ */
+export async function cropToSquare(
+  videoUrl: string,
+  size: number = 1080,
+  mute: boolean = true,
+  onProgress?: (progress: number, status: string) => void
+): Promise<string> {
+  try {
+    // 1. 加载 FFmpeg
+    if (onProgress) onProgress(0, '正在加载视频处理工具...')
+    const ffmpeg = await loadFFmpeg((p) => {
+      if (onProgress && p < 20) {
+        onProgress(p, '正在加载视频处理工具...')
+      }
+    })
+
+    // 2. 获取原始视频文件
+    if (onProgress) onProgress(20, '正在下载原始视频...')
+    const videoData = await fetchFile(videoUrl)
+
+    // 3. 写入 FFmpeg 虚拟文件系统
+    if (onProgress) onProgress(30, '正在准备视频文件...')
+    await ffmpeg.writeFile('input.mp4', videoData)
+
+    // 4. 执行视频缩放（保持宽高比，添加黑边）
+    if (onProgress) onProgress(40, '正在转换为1:1尺寸...')
+
+    // FFmpeg 命令：保持宽高比缩放到正方形，添加黑边
+    // -i input.mp4: 输入文件
+    // -vf "scale=w=1080:h=1080:force_original_aspect_ratio=decrease,pad=1080:1080:(ow-iw)/2:(oh-ih)/2:black":
+    //   - scale: 缩放到正方形内，保持宽高比（缩放到能放进1080x1080的最大尺寸）
+    //   - force_original_aspect_ratio=decrease: 保持原始宽高比，缩小到能放进目标尺寸
+    //   - pad: 添加黑边填充到1080x1080，居中对齐
+    // -c:v libx264: 使用 H.264 编码
+    // -preset fast: 快速编码
+    // -crf 18: 高质量 (0-51, 越小质量越高)
+    // -an: 移除音频（静音）/ -c:a copy: 保留音频
+    const videoFilter = `scale=w=${size}:h=${size}:force_original_aspect_ratio=decrease,pad=${size}:${size}:(ow-iw)/2:(oh-ih)/2:black`
+
+    const ffmpegArgs = [
+      '-i', 'input.mp4',
+      '-vf', videoFilter,
+      '-c:v', 'libx264',
+      '-preset', 'fast',
+      '-crf', '18'
+    ]
+
+    // 根据静音选项添加音频参数
+    if (mute) {
+      ffmpegArgs.push('-an') // 移除音频
+    } else {
+      ffmpegArgs.push('-c:a', 'copy') // 保留音频
+    }
+
+    ffmpegArgs.push('output_square.mp4')
+
+    await ffmpeg.exec(ffmpegArgs)
+
+    // 5. 读取处理后的视频
+    if (onProgress) onProgress(90, '正在生成下载文件...')
+    const data = await ffmpeg.readFile('output_square.mp4')
+
+    // 6. 创建 Blob URL
+    const blob = new Blob([data], { type: 'video/mp4' })
+    const blobUrl = URL.createObjectURL(blob)
+
+    // 7. 清理虚拟文件系统
+    try {
+      await ffmpeg.deleteFile('input.mp4')
+      await ffmpeg.deleteFile('output_square.mp4')
+    } catch (e) {
+      console.warn('清理临时文件失败:', e)
+    }
+
+    if (onProgress) onProgress(100, '1:1尺寸转换完成！')
+    return blobUrl
+  } catch (error) {
+    console.error('视频缩放失败:', error)
+    throw new Error('视频1:1尺寸转换失败，请重试')
+  }
+}
+
+/**
  * 下载处理后的视频
  *
  * @param blobUrl - 视频 Blob URL

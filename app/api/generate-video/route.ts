@@ -104,17 +104,16 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { prompt, category } = body
     let imageUrl = body.imageUrl // 使用 let 允许重新赋值
-    let headImageUrl = body.headImageUrl // 首图
-    let tailImageUrl = body.tailImageUrl // 尾图
-    let clothingImageUrl = body.clothingImageUrl // 服装图片
+    let headImageUrl = body.headImageUrl // 首图（食品首尾帧 & 模特正面照）
+    let tailImageUrl = body.tailImageUrl // 尾图（食品首尾帧 & 模特背面照）
 
-    if (!prompt || (!category && !imageUrl && !headImageUrl && !clothingImageUrl)) {
+    if (!prompt || (!category && !imageUrl && !headImageUrl)) {
       return NextResponse.json(
         {
           success: false,
           error: {
             type: VideoErrorType.VALIDATION_ERROR,
-            message: '缺少必要参数：prompt 或 category/imageUrl/headImageUrl/clothingImageUrl',
+            message: '缺少必要参数：prompt 或 category/imageUrl/headImageUrl',
           },
         },
         { status: 400 }
@@ -198,59 +197,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. 将 Base64 服装图片上传到图床获取 URL
-    if (clothingImageUrl && clothingImageUrl.startsWith('data:image/')) {
-      console.log('检测到 Base64 服装图片，开始压缩...')
-      try {
-        // 压缩图片
-        const compressedClothingImage = await compressBase64Image(clothingImageUrl, 1920, 80)
-
-        // 上传到 Imgur
-        console.log('服装图片压缩完成，正在上传到 Imgur 图床...')
-        clothingImageUrl = await uploadBase64ToImgur(compressedClothingImage)
-        console.log('服装图片上传成功 (Imgur):', clothingImageUrl)
-      } catch (err) {
-        console.error('服装图片处理失败:', err)
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              type: VideoErrorType.API_ERROR,
-              message: '服装图片处理失败，请重试',
-            },
-          },
-          { status: 500 }
-        )
-      }
-    }
-
-    // 确定生成模式
-    const mode = headImageUrl ? '首尾帧生成' : (imageUrl ? '图片生成' : (clothingImageUrl ? '模特展示' : '文字生成'))
+    // 确定生成模式（首尾帧模式包括：食品分解动画 & 模特360度展示）
+    const mode = headImageUrl ? '首尾帧生成' : (imageUrl ? '图片生成' : '文字生成')
     console.log('开始生成视频，模式:', mode)
     console.log('品类:', category || `(${mode})`)
     console.log('图片URL:', imageUrl || '(无)')
     console.log('首图URL:', headImageUrl || '(无)')
     console.log('尾图URL:', tailImageUrl || '(无)')
-    console.log('服装图片URL:', clothingImageUrl || '(无)')
     console.log('提示词:', prompt)
 
     // 4. 准备图片数组
     let images: string[] = []
     if (headImageUrl && tailImageUrl) {
-      // 首尾帧模式：传递首图和尾图
+      // 首尾帧模式：传递首图和尾图（食品分解动画 & 模特360度展示）
       images = [headImageUrl, tailImageUrl]
     } else if (imageUrl) {
       // 图片生成模式：传递单张图片
       images = [imageUrl]
-    } else if (clothingImageUrl) {
-      // 模特展示模式：传递服装图片
-      images = [clothingImageUrl]
     }
 
-    // 5. 根据模式确定宽高比
-    // 模特展示模式使用竖屏 9:16，其他模式使用横屏 16:9
-    const aspectRatio = clothingImageUrl ? '9:16' : VIDEO_SPECS.aspectRatio
-    console.log('视频宽高比:', aspectRatio)
+    // 5. 确定宽高比
+    // 检查是否是模特展示模式（通过prompt关键词判断）
+    const isModelMode = prompt.toLowerCase().includes('fashion model showcase')
+    const aspectRatio = isModelMode ? '9:16' : VIDEO_SPECS.aspectRatio // 模特模式用9:16竖屏，其他用16:9横屏
+    console.log('视频宽高比:', aspectRatio, isModelMode ? '(模特展示-竖屏)' : '(标准-横屏)')
 
     // 6. 调用云雾 Veo API
     const veoResponse = await fetch(`${VEO_API_CONFIG.baseURL}${VEO_API_CONFIG.endpoint}`, {

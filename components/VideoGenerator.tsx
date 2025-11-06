@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { generateVideo } from '@/lib/api'
+import { MODEL_SHOWCASE_VIDEO_PROMPT } from '@/lib/prompts'
 import { VideoPlayer } from './VideoPlayer'
 import { ImageUpload } from './ImageUpload'
 import type { VideoResult } from '@/types/video'
@@ -26,10 +27,9 @@ export function VideoGenerator() {
   const [optimizedPrompt, setOptimizedPrompt] = useState('') // Coze 优化后的 Prompt
   const [optimizing, setOptimizing] = useState(false) // Prompt 优化中
   const [imageUrl, setImageUrl] = useState<string | null>(null) // 上传的图片URL（图片生成模式）
-  const [headImageUrl, setHeadImageUrl] = useState<string | null>(null) // 首图URL（首尾帧模式）
-  const [tailImageUrl, setTailImageUrl] = useState<string | null>(null) // 尾图URL（首尾帧模式）
+  const [headImageUrl, setHeadImageUrl] = useState<string | null>(null) // 首图URL（首尾帧模式 & 模特正面照）
+  const [tailImageUrl, setTailImageUrl] = useState<string | null>(null) // 尾图URL（首尾帧模式 & 模特背面照）
   const [generatingTailImage, setGeneratingTailImage] = useState(false) // 正在生成尾图
-  const [clothingImageUrl, setClothingImageUrl] = useState<string | null>(null) // 服装图片URL（模特展示模式）
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoResult, setVideoResult] = useState<VideoResult | null>(null)
@@ -234,22 +234,28 @@ export function VideoGenerator() {
       }
     }
 
-    if (mode === 'model' && !clothingImageUrl) {
-      setError('请先上传服装图片')
-      return
+    if (mode === 'model') {
+      if (!headImageUrl) {
+        setError('请先上传正面全身照')
+        return
+      }
+      if (!tailImageUrl) {
+        setError('请先上传背面全身照')
+        return
+      }
     }
 
     setLoading(true)
 
     try {
       // 调用 API 生成视频
+      // 注意：模特模式需要明确传递 MODEL_SHOWCASE_VIDEO_PROMPT
       const result = await generateVideo(
         mode === 'text' ? category : undefined,
         mode === 'image' ? (imageUrl || undefined) : undefined,
-        mode === 'text' ? optimizedPrompt : undefined, // 使用优化后的 Prompt
-        mode === 'firstLast' ? headImageUrl : undefined, // 首图
-        mode === 'firstLast' ? tailImageUrl : undefined, // 尾图
-        mode === 'model' ? (clothingImageUrl || undefined) : undefined // 服装图片
+        mode === 'text' ? optimizedPrompt : mode === 'model' ? MODEL_SHOWCASE_VIDEO_PROMPT() : undefined, // 模特模式使用专用提示词
+        (mode === 'firstLast' || mode === 'model') ? headImageUrl : undefined, // 首图（食品首尾帧 & 模特正面照）
+        (mode === 'firstLast' || mode === 'model') ? tailImageUrl : undefined  // 尾图（食品首尾帧 & 模特背面照）
       )
       setProgress(100) // 完成时设为100%
       setVideoResult(result)
@@ -373,19 +379,56 @@ export function VideoGenerator() {
               )}
             </TabsContent>
 
-            {/* 模特展示模式 */}
+            {/* 模特展示模式 - 首尾帧上传（正面照+背面照）*/}
             <TabsContent value="model" className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
-                  上传服装图片
-                </label>
-                <ImageUpload
-                  onImageUploaded={(url) => setClothingImageUrl(url)}
-                  maxSizeMB={5}
-                />
-                <p className="text-xs text-muted-foreground">
-                  上传模特穿着的服装图片，AI将生成专业时装秀展示视频：远景展示整体造型，近景突出服装细节，侧面和转身展示立体效果，高端大气的专业走秀风格
-                </p>
+              <div className="space-y-4">
+                {/* 上传正面全身照 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    1️⃣ 上传正面全身照
+                  </label>
+                  <ImageUpload
+                    onImageUploaded={(url) => setHeadImageUrl(url)}
+                    maxSizeMB={5}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    上传模特正面全身照片，确保从头到脚完整展示
+                  </p>
+                </div>
+
+                {/* 上传背面全身照 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    2️⃣ 上传背面全身照
+                  </label>
+                  <ImageUpload
+                    onImageUploaded={(url) => setTailImageUrl(url)}
+                    maxSizeMB={5}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    上传模特背面全身照片，确保从头到脚完整展示
+                  </p>
+                </div>
+
+                {/* 首尾帧对比预览 */}
+                {headImageUrl && tailImageUrl && (
+                  <div className="p-4 rounded-md bg-purple-50 border border-purple-200">
+                    <p className="text-sm font-medium text-purple-900 mb-3">🎬 正面背面对比预览</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs text-purple-700 mb-2">正面照</p>
+                        <img src={headImageUrl} alt="正面照" className="w-full rounded-md" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-purple-700 mb-2">背面照</p>
+                        <img src={tailImageUrl} alt="背面照" className="w-full rounded-md" />
+                      </div>
+                    </div>
+                    <p className="text-xs text-purple-600 mt-3">
+                      AI 将生成 8 秒 9:16 竖屏视频：模特从正面优雅旋转 180 度到背面，完整展示服装的正面和背面细节
+                    </p>
+                  </div>
+                )}
               </div>
             </TabsContent>
 
@@ -488,7 +531,7 @@ export function VideoGenerator() {
               (mode === 'text' && !category.trim()) ||
               (mode === 'image' && !imageUrl) ||
               (mode === 'firstLast' && (!headImageUrl || !tailImageUrl)) ||
-              (mode === 'model' && !clothingImageUrl)
+              (mode === 'model' && (!headImageUrl || !tailImageUrl))
             }
             className="w-full"
             size="lg"

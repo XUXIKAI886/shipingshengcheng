@@ -7,11 +7,11 @@
  */
 
 import { useState } from 'react'
-import { Download, CheckCircle2, Settings, Loader2 } from 'lucide-react'
+import { Download, CheckCircle2, Settings, Loader2, Crop } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { downloadVideo } from '@/lib/api'
-import { resizeVideo, downloadProcessedVideo } from '@/lib/videoProcessor'
+import { resizeVideo, cropToSquare, downloadProcessedVideo } from '@/lib/videoProcessor'
 import { Progress } from '@/components/ui/progress'
 
 interface VideoPlayerProps {
@@ -125,6 +125,46 @@ export function VideoPlayer({ videoUrl, category }: VideoPlayerProps) {
     }
   }
 
+  /**
+   * 处理裁剪为1:1尺寸并下载（保持宽高比，添加黑边，静音）
+   */
+  const handleCropToSquareAndDownload = async () => {
+    try {
+      setProcessing(true)
+      setProgress(0)
+      setProgressText('正在初始化...')
+
+      // 裁剪视频为1:1正方形尺寸（1080×1080），保持宽高比，添加黑边，静音
+      const processedBlobUrl = await cropToSquare(
+        videoUrl,
+        1080,
+        true, // 静音
+        (prog, status) => {
+          setProgress(prog)
+          setProgressText(status)
+        }
+      )
+
+      // 下载处理后的视频
+      const timestamp = new Date().getTime()
+      const filename = `店铺视频_${category}_1x1_静音_${timestamp}.mp4`
+      downloadProcessedVideo(processedBlobUrl, filename)
+
+      setProgressText('下载完成！')
+      setTimeout(() => {
+        setProcessing(false)
+        setProgress(0)
+        setProgressText('')
+      }, 2000)
+    } catch (error) {
+      console.error('视频裁剪失败:', error)
+      setProcessing(false)
+      setProgress(0)
+      setProgressText('')
+      alert('视频1:1尺寸转换失败，请重试或直接下载原始视频')
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -139,6 +179,15 @@ export function VideoPlayer({ videoUrl, category }: VideoPlayerProps) {
             </CardDescription>
           </div>
           <div className="flex gap-2">
+            <Button
+              onClick={handleCropToSquareAndDownload}
+              disabled={downloading || processing}
+              variant="default"
+              size="sm"
+            >
+              <Crop className="mr-2 h-4 w-4" />
+              {processing ? '处理中...' : '下载 (1:1 静音)'}
+            </Button>
             <Button
               onClick={handleResizeAndDownload}
               disabled={downloading || processing}

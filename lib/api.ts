@@ -13,8 +13,8 @@ import { VIDEO_PROMPT_TEMPLATE, IMAGE_TO_VIDEO_PROMPT, FIRST_LAST_FRAME_VIDEO_PR
  * @param category - 店铺经营品类（文字生成模式）
  * @param imageUrl - 图片URL（图片生成模式）
  * @param customPrompt - 自定义提示词（可选，如果提供则使用此提示词而不是默认模板）
- * @param headImageUrl - 首图URL（首尾帧生成模式）
- * @param tailImageUrl - 尾图URL（首尾帧生成模式）
+ * @param headImageUrl - 首图URL（首尾帧生成模式 & 模特正面照）
+ * @param tailImageUrl - 尾图URL（首尾帧生成模式 & 模特背面照）
  * @returns Promise<VideoResult> - 视频生成结果
  * @throws Error - 当 API 调用失败时抛出错误
  *
@@ -29,8 +29,11 @@ import { VIDEO_PROMPT_TEMPLATE, IMAGE_TO_VIDEO_PROMPT, FIRST_LAST_FRAME_VIDEO_PR
  * // 图片生成模式
  * const result3 = await generateVideo(undefined, 'https://example.com/image.jpg')
  *
- * // 首尾帧生成模式
+ * // 首尾帧生成模式（食品）
  * const result4 = await generateVideo(undefined, undefined, undefined, 'head.jpg', 'tail.jpg')
+ *
+ * // 模特展示模式（正面照+背面照）
+ * const result5 = await generateVideo(undefined, undefined, undefined, 'front.jpg', 'back.jpg')
  * ```
  */
 export async function generateVideo(
@@ -38,15 +41,14 @@ export async function generateVideo(
   imageUrl?: string,
   customPrompt?: string,
   headImageUrl?: string,
-  tailImageUrl?: string,
-  clothingImageUrl?: string
+  tailImageUrl?: string
 ): Promise<VideoResult> {
   // 1. 验证：至少提供一种模式
-  if (!category && !imageUrl && !headImageUrl && !clothingImageUrl) {
-    throw new Error('请提供品类、图片、首尾帧图片或服装图片')
+  if (!category && !imageUrl && !headImageUrl) {
+    throw new Error('请提供品类、图片或首尾帧图片')
   }
 
-  // 2. 首尾帧模式验证
+  // 2. 首尾帧模式验证（包括食品和模特展示）
   if (headImageUrl && !tailImageUrl) {
     throw new Error('首尾帧模式需要同时提供首图和尾图')
   }
@@ -60,15 +62,16 @@ export async function generateVideo(
   }
 
   // 4. 构建提示词
+  // 注意：首尾帧模式既可能是食品（FIRST_LAST_FRAME）也可能是模特（MODEL_SHOWCASE）
+  // 由于两者都使用 headImageUrl 和 tailImageUrl，后端需要根据上下文判断
+  // 这里默认如果只有首尾帧，使用食品模式；如果前端明确是模特模式，会使用相同的prompt结构
   const prompt = customPrompt
     ? customPrompt // 使用 Coze 优化后的 Prompt
     : imageUrl
       ? IMAGE_TO_VIDEO_PROMPT() // 图片生成模式
-      : headImageUrl
-        ? FIRST_LAST_FRAME_VIDEO_PROMPT() // 首尾帧模式使用专用提示词
-        : clothingImageUrl
-          ? MODEL_SHOWCASE_VIDEO_PROMPT() // 模特展示模式使用专用提示词
-          : VIDEO_PROMPT_TEMPLATE(category!) // 文字生成模式
+      : headImageUrl && tailImageUrl
+        ? FIRST_LAST_FRAME_VIDEO_PROMPT() // 首尾帧模式（食品或模特都使用此prompt）
+        : VIDEO_PROMPT_TEMPLATE(category!) // 文字生成模式
 
   try {
     // 5. 调用后端 API 路由
@@ -83,7 +86,6 @@ export async function generateVideo(
         imageUrl,
         headImageUrl,
         tailImageUrl,
-        clothingImageUrl,
       }),
     })
 

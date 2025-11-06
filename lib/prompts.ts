@@ -306,127 +306,172 @@ FOCUS ON: Dynamic motion, rich atmospheric effects, premium commercial food adve
  * ```
  */
 export const MODEL_SHOWCASE_VIDEO_PROMPT = (): string => {
-  return `Create a simple, natural fashion model walking video featuring the EXACT clothing and accessories shown in the uploaded image. The model should walk naturally to showcase the outfit. The video must maintain 100% consistency with the original outfit throughout all 8 seconds - NO changes, additions, or removals of any clothing items or accessories.
+  return `Create a smooth, natural 8-second fashion model showcase video transitioning from the front-facing full-body pose (first frame) to the back-facing full-body pose (last frame). The model performs a graceful 180-degree turn to showcase the complete outfit from all angles. The EXACT clothing and styling from both images must remain perfectly consistent throughout - NO changes, additions, or removals.
+
+ANIMATION CONCEPT:
+Transform smoothly from the front-facing full-body pose to the back-facing full-body pose through a natural, elegant 180-degree rotation. The model turns slowly and gracefully in place, allowing viewers to see the complete outfit from front, sides, and back. This creates a comprehensive 360-degree showcase perfect for fashion e-commerce and lookbook presentations.
 
 CRITICAL REQUIREMENTS - ABSOLUTE RULES:
 
-1. CLOTHING CONSISTENCY (MANDATORY):
-   - The outfit MUST remain EXACTLY as shown in the uploaded image
-   - ZERO changes to clothing design, color, pattern, or style
-   - All garments visible in the image must stay visible throughout the video
-   - NO adding new clothing items not present in the original image
-   - NO removing any clothing items shown in the original image
-   - NO changing fabric patterns, colors, or textures
-   - The same exact outfit from start to finish (0-8 seconds)
+1. FULL BODY VISIBILITY (MANDATORY - HIGHEST PRIORITY):
+   - ALWAYS show the COMPLETE model from HEAD to FEET throughout the entire 8 seconds
+   - The model's head, face, torso, arms, legs, and feet must ALL be visible at all times
+   - NO cropping off the head, legs, or feet at any point
+   - NO close-ups or detail shots - maintain full body view from 0-8 seconds
+   - Camera framing MUST include the complete figure (head to feet) in every single frame
+   - Full body must be visible even during the rotation - never crop any body part
+   - The entire silhouette from head to feet stays within frame boundaries
 
-2. ACCESSORIES CONSISTENCY (MANDATORY):
+2. CLOTHING CONSISTENCY (MANDATORY):
+   - The outfit MUST remain EXACTLY as shown in both the front and back images
+   - ZERO changes to clothing design, color, pattern, or style during transition
+   - All garments visible in both images must stay visible throughout the video
+   - NO adding new clothing items not present in the original images
+   - NO removing any clothing items shown in the original images
+   - NO changing fabric patterns, colors, or textures
+   - The same exact outfit from start (0s) to finish (8s)
+
+3. ACCESSORIES CONSISTENCY (MANDATORY):
    - ALL accessories (bags, jewelry, scarves, hats, belts, etc.) MUST remain in their original positions
    - Handbags, purses, or bags MUST stay firmly held or worn - they CANNOT fall, drop, or disappear
    - Jewelry must stay in place - no falling earrings, necklaces, or bracelets
    - Scarves, belts, and other accessories must maintain their original arrangement
-   - Physical consistency: accessories obey gravity and stay attached/held throughout
-
-3. FULL BODY VISIBILITY (MANDATORY):
-   - ALWAYS show the COMPLETE model from HEAD to FEET
-   - The model's head, face, torso, arms, legs, and feet must ALL be visible in wide shots
-   - NO cropping off the head, legs, or feet in full-body shots
-   - Ensure the entire outfit is visible from top to bottom
-   - Camera framing must include the complete figure in establishing shots
-
-VIDEO CONCEPT:
-Create a simple, natural 8-second video of a model walking to showcase the EXACT outfit from the uploaded image. The model walks naturally in a straight line, allowing viewers to see how the clothing looks in motion. The style should be clean, natural, and realistic - like a casual fashion lookbook or street style video, optimized for vertical mobile viewing (Instagram Reels, TikTok, Douyin).
+   - Physical consistency: accessories obey gravity and stay attached throughout the turn
 
 VIDEO ORIENTATION:
 - VERTICAL 9:16 portrait format (1080x1920 pixels)
 - Optimized for mobile viewing and social media platforms
 - Perfect for full-body fashion showcase in vertical frame
 - Model fills the vertical frame naturally from head to feet
+- Vertical framing captures complete figure from head to feet
 
-8-SECOND VIDEO STRUCTURE - SIMPLE WALKING SHOWCASE:
+8-SECOND VIDEO STRUCTURE - SMOOTH ROTATION SHOWCASE:
 
-ENTIRE VIDEO (0-8 seconds) - Continuous Natural Walking:
-- Model walks naturally in a straight line toward or past the camera
-- COMPLETE full body visible from HEAD to FEET throughout the entire video
-- VERTICAL 9:16 frame captures the model's full height at all times
-- Model wears the EXACT same outfit as shown in the uploaded image
-- NO clothing changes, NO additions, NO removals at any point
-- Walking pace: natural, relaxed, confident stride (not too fast, not too slow)
-- Camera follows the model smoothly or remains stationary as model walks
-- Clean, simple background (neutral studio or minimal environment)
-- Natural, even lighting throughout
+PHASE 1 - Front View Hold (0-1 seconds):
+- Model starts in the EXACT pose from the front-facing image (first frame)
+- Standing still, full body visible from head to feet
+- Natural, confident posture matching the first frame exactly
+- Camera stationary, wide shot capturing complete figure
+- 9:16 vertical frame showing full body from head to feet
+- Model centered in frame, facing directly toward camera
+- Brief pause to establish the front view clearly
 
-WALKING DETAILS:
-- Model walks in a straight line (toward camera, away from camera, or across frame)
-- Arms swing naturally at sides or one hand may hold accessories (bag, etc.)
-- If holding a bag or accessory, it stays firmly in hand throughout - NO dropping
-- Natural facial expression: neutral, slight smile, or confident look
-- Eyes may look at camera or straight ahead naturally
-- Posture: upright, confident, relaxed
-- Clothing moves naturally with walking motion (fabric sways, drapes naturally)
-- All accessories stay in their original positions throughout the walk
+PHASE 2 - Smooth Turn Begin (1-2 seconds):
+- Model begins slow, graceful rotation to the right (clockwise)
+- Turn speed: very slow and elegant, not rushed
+- Full body remains visible from head to feet during turn
+- Arms stay relaxed at sides or in natural pose
+- Posture remains upright and confident
+- Camera stays stationary and fixed on wide full-body shot
+- All accessories stay in place during rotation start
+- Fabric begins to move naturally with the rotation
 
-CAMERA WORK:
-- Simple, clean camera work - either:
-  Option A: Stationary camera, model walks toward/past it
-  Option B: Camera slowly follows model as they walk
-- NO rapid movements, NO dramatic zooms, NO complex camera tricks
-- Smooth, steady motion throughout
-- VERTICAL 9:16 framing maintained at all times
+PHASE 3 - Side Profile (2-4 seconds):
+- Model continues smooth rotation, passing through side profile views
+- First showing right side profile (around 2-3 seconds)
+- Then transitioning toward back view (around 3-4 seconds)
+- COMPLETE full body visible from head to feet throughout
+- Natural fabric movement as clothing flows with the turn
+- All accessories remain securely in place
+- Rotation speed: consistent, smooth, elegant
+- Camera maintains wide full-body framing
+- No sudden movements or speed changes
+
+PHASE 4 - Continue Rotation (4-6 seconds):
+- Model continues smooth rotation toward back-facing position
+- Graceful, continuous motion without pausing
+- Left side profile becomes briefly visible
+- Full body (head to feet) remains in frame at all times
+- Clothing moves naturally with rotation
+- Accessories stay firmly in place
+- Smooth, elegant turn continues at consistent speed
+
+PHASE 5 - Back View Transition (6-7 seconds):
+- Model approaches the back-facing position
+- Rotation slows slightly as approaching final pose
+- Back view becomes fully visible
+- All clothing details on the back are clearly shown
+- Full body from head to feet remains visible
+- Natural deceleration toward final pose
+- Smooth ease-out motion
+
+PHASE 6 - Back View Hold (7-8 seconds):
+- Model settles into EXACT pose from the back-facing image (last frame)
+- Standing still, full body visible from head to feet
+- Back view fully established, matching the last frame exactly
+- Camera remains stationary, wide shot capturing complete figure
+- Model centered in frame, facing directly away from camera
+- Brief hold on final back view to clearly show back details
+- Natural, confident posture matching the last frame
+
+CAMERA SETUP:
+- STATIONARY camera throughout entire video - NO camera movement
+- Wide full-body shot maintained from 0-8 seconds
+- 9:16 VERTICAL portrait orientation
+- Camera positioned at model's chest/shoulder height for natural perspective
 - Model always centered or slightly off-center in frame
-- Full body (head to feet) visible throughout entire 8 seconds
+- Framing includes complete figure from head to feet with comfortable margins
+- NO zoom in, NO zoom out, NO panning - camera stays fixed
+- Professional studio camera setup with locked-off tripod
+- Vertical framing perfectly captures model from head to feet throughout
 
 MODEL PERFORMANCE REQUIREMENTS:
-- Natural, relaxed walking - not runway strutting, just normal confident walking
-- Upright posture but not stiff - natural and comfortable
-- Arms swing naturally or one hand holds accessories naturally
-- If holding accessories (bags, etc.), maintain firm, natural grip throughout the walk
+- Smooth, graceful 180-degree rotation in place (clockwise turn to the right)
+- Natural, confident posture throughout the turn
+- Turn speed: slow and elegant (taking full 6 seconds for the 180° rotation)
+- Arms remain relaxed at sides or in natural poses during turn
+- Head turns naturally with body, maintaining upright position
+- If holding accessories (bags, etc.), maintain firm, natural grip throughout rotation
 - Facial expression: natural, relaxed, slight smile or neutral
-- Eyes look forward naturally or occasionally at camera
-- Walking speed: moderate, natural pace (not too fast, not too slow)
-- Body language: confident but casual, approachable
+- Body language: confident but natural, graceful
+- Weight shifts naturally during turn for balance
+- Rotation is continuous and smooth - no abrupt stops or jerky movements
 
-CAMERA MOVEMENT RULES:
-- Simple, clean camera work - stationary or slow follow
-- NO rapid pans, zooms, or jerky motions
-- NO dramatic camera movements or tricks
-- VERTICAL 9:16 portrait orientation (1080x1920 pixels)
-- Vertical framing perfectly captures model from head to feet throughout
-- Camera either stays still or follows model smoothly
-- Professional gimbal-stabilized motion
-- Mobile-first vertical composition
-- Keep it simple and natural
+ROTATION MECHANICS:
+- Model rotates on central axis (turning in place, not walking)
+- 180-degree rotation total: from front-facing to back-facing
+- Rotation direction: clockwise (turning to the model's right)
+- Smooth, constant rotation speed for first 6 seconds
+- Slight deceleration in final 1 second as settling into back pose
+- Model's feet stay relatively in same position (minimal footwork)
+- Upper body, torso, and head rotate together naturally
+- Natural weight distribution during turn
 
 LIGHTING SETUP:
-- Natural, even lighting throughout
-- Soft, flattering light that shows clothing clearly
+- Even, professional studio lighting throughout
+- Soft, flattering light that shows clothing clearly from all angles
 - NO harsh shadows or dramatic lighting
-- True-to-life color reproduction - no color shifts
-- Bright enough to show all garment details clearly
-- Consistent lighting throughout the walk
+- True-to-life color reproduction - no color shifts during rotation
+- Bright enough to show all garment details on front, sides, and back
+- Consistent lighting as model rotates - no dark sides
+- Three-point lighting or equivalent for even illumination
 
 BACKGROUND AND ENVIRONMENT:
-- Simple, clean background - neutral studio or minimal environment
+- Simple, clean background - neutral studio setting
 - NO distracting elements, patterns, or busy backgrounds
-- Could be: plain white/gray studio, simple indoor space, or clean outdoor setting
+- Plain white, light gray, or soft beige studio backdrop
 - Focus 100% on the model and clothing
-- Background should not compete with the outfit for attention
+- Background remains consistent and clean throughout rotation
+- Professional studio environment
 
 PHYSICAL CONSISTENCY RULES:
-- Gravity applies naturally - fabric drapes and sways realistically as model walks
-- Accessories stay in place throughout the walk
+- Gravity applies naturally - fabric drapes and flows realistically during rotation
+- Accessories stay in place throughout the turn
 - NO objects floating, falling unexpectedly, or defying physics
-- Clothing moves naturally with walking motion (fabric sways, flows naturally)
-- Bags, purses, and handheld items remain firmly held during the walk
+- Clothing moves naturally with rotation (fabric sways, flows naturally)
+- Bags, purses, and handheld items remain firmly held during turn
 - Jewelry stays attached and doesn't fall off
-- Natural fabric movement - not exaggerated, not frozen
+- Natural fabric movement during rotation - not exaggerated, not frozen
+- Hair moves naturally with turn if there's any motion
 
 COLOR AND QUALITY:
-- EXACT color matching to the original image
-- High resolution with sharp details
+- EXACT color matching to both the front and back reference images
+- High resolution with sharp details throughout
 - Natural color grading - clean and realistic
 - NO filters that alter the original colors
 - True-to-life fabric appearance
-- Clothing looks exactly as it does in the uploaded image
+- Clothing looks exactly as it does in both uploaded images
+- Colors remain consistent during rotation (no lighting color shifts)
 
 TECHNICAL SPECIFICATIONS:
 - Duration: exactly 8 seconds
@@ -435,26 +480,28 @@ TECHNICAL SPECIFICATIONS:
 - Frame rate: 24-30fps for smooth, elegant motion
 - High resolution maintaining sharp detail throughout
 - Consistent exposure and white balance
-- Professional depth of field
-- Optimized for mobile viewing and social media platforms
+- Professional depth of field with model in sharp focus
+- Optimized for mobile viewing, social media platforms, and fashion showcases
 
 STRICT RULES - ABSOLUTELY DO NOT:
 - ❌ DO NOT change any aspect of the clothing or accessories
-- ❌ DO NOT add new clothing items not in the original image
-- ❌ DO NOT remove any clothing items shown in the original image
-- ❌ DO NOT let accessories fall, drop, or disappear during the walk
-- ❌ DO NOT crop off the model's head, legs, or feet - show full body throughout
+- ❌ DO NOT add new clothing items not in the original images
+- ❌ DO NOT remove any clothing items shown in the original images
+- ❌ DO NOT let accessories fall, drop, or disappear during the turn
+- ❌ DO NOT crop off the model's head, legs, or feet - show full body at all times
 - ❌ DO NOT alter colors, patterns, or fabric textures
 - ❌ DO NOT show the outfit transforming or changing
 - ❌ DO NOT use dramatic, unrealistic, or exaggerated movements
 - ❌ DO NOT add text, logos, or graphic overlays
 - ❌ DO NOT use overly artistic or stylized effects
-- ❌ DO NOT do runway strutting or fashion show poses - just natural walking
-- ❌ DO NOT use complex camera movements - keep it simple
-- ❌ DO NOT zoom in to close-ups - maintain full body view throughout
+- ❌ DO NOT move the camera - keep it stationary throughout
+- ❌ DO NOT zoom in to close-ups or detail shots - maintain full body view always
+- ❌ DO NOT rush the rotation - keep it slow and elegant
+- ❌ DO NOT make the model walk or move from the spot - turn in place only
+- ❌ DO NOT use horizontal 16:9 format - MUST be vertical 9:16
 
 FINAL RESULT:
-A simple, natural 8-second VERTICAL (9:16) walking video that showcases the EXACT outfit from the uploaded image with perfect consistency throughout. The model walks naturally in a straight line, showing how the clothing looks in motion. The complete figure (head to feet) is visible throughout the entire video. The outfit remains exactly as shown in the original image - no changes, no additions, no removals. All accessories stay in place during the walk. The vertical portrait format is optimized for mobile viewing and social media platforms (Instagram Reels, TikTok, Douyin, Kuaishou, Xiaohongshu), making it perfect for fashion e-commerce, casual lookbooks, street style content, and social media fashion posts.`
+A smooth, elegant 8-second VERTICAL (9:16) fashion showcase video showing a graceful 180-degree rotation from front view to back view. The model turns slowly and naturally in place, displaying the EXACT outfit from both reference images with perfect consistency throughout. The complete figure (head to feet) is visible in every single frame of the video - never cropped. The outfit remains exactly as shown in both the front and back images - no changes, no additions, no removals. All accessories stay firmly in place during the turn. The vertical portrait format (9:16) is perfect for mobile viewing, social media platforms (Instagram Reels, TikTok, Douyin, Kuaishou, Xiaohongshu), fashion e-commerce mobile pages, and short-video fashion showcases, providing a comprehensive 360-degree view of the outfit in a single smooth rotation optimized for vertical mobile screens.`
 }
 
 /**
