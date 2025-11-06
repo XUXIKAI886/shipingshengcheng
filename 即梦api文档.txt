@@ -1,0 +1,33 @@
+gemini-2.5-flash-image正式版支持比例控制:2:3 ，3:2 ，3:4 ，4:3 ，4:5 ，5:4 ，9:16，16:9，21:9。为了兼容性你需要添加extra_body和开头额外的system的message来控制。
+imageUrl为图片地址或者data:image/jpeg;base64,${base64};格式的数据,细节可以参考openai官方文档
+curl -X POST "https://newapi.pockgo.com/v1/chat/completions"  -H "Content-Type: application/json"  -H "Authorization: Bearer YOUR_API_KEY"  -d '{
+    "extra_body":{
+        "imageConfig": {
+          "aspectRatio": "16:9"
+        }
+    },
+    "model": "gemini-2.5-flash-image",
+    "messages": [
+      {
+      "role":"system",
+      "content":"{"imageConfig": {"aspectRatio": "16:9"}}"
+      },
+      {
+        "role": "user",
+        "content": [
+          {
+            type: 'text',
+            text: 'Generate an image draw a nano banana ',
+          },
+         {
+            type: 'image_url',
+            image_url: {
+              url: imageUrl,
+            },
+          }
+         ]
+      }
+    ],
+    "max_tokens": 150,
+    "temperature": 0.7
+  }'

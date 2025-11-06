@@ -1,0 +1,133 @@
+  return (
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* 输入表单卡片 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-6 w-6 text-primary" />
+            外卖店铺视频生成
+          </CardTitle>
+          <CardDescription>
+            选择生成方式：输入品类文字描述，或上传店招图片让AI动起来
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* 模式切换 Tabs */}
+          <Tabs value={mode} onValueChange={(value) => setMode(value as 'text' | 'image')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="text" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                文字生成
+              </TabsTrigger>
+              <TabsTrigger value="image" className="flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                图片生成
+              </TabsTrigger>
+            </TabsList>
+
+            {/* 文字生成模式 */}
+            <TabsContent value="text" className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="category" className="text-sm font-medium">
+                  店铺经营品类
+                </label>
+                <Input
+                  id="category"
+                  placeholder="例如：盖浇饭炒菜、奶茶、烧烤等"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  disabled={loading}
+                  className="text-base"
+                  maxLength={50}
+                />
+                <p className="text-xs text-muted-foreground">
+                  2-50个字符，AI 将生成展示该品类美食的专业视频
+                </p>
+              </div>
+            </TabsContent>
+
+            {/* 图片生成模式 */}
+            <TabsContent value="image" className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  上传店招图片
+                </label>
+                <ImageUpload
+                  onImageUploaded={(url) => setImageUrl(url)}
+                  maxSizeMB={5}
+                />
+                <p className="text-xs text-muted-foreground">
+                  上传外卖店招图片，AI 将让图片中的食物旋转、冒热气，文字闪烁发光
+                </p>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* 生成按钮 */}
+          <Button
+            onClick={handleGenerate}
+            disabled={loading || (mode === 'text' && !category.trim()) || (mode === 'image' && !imageUrl)}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                生成中，请稍候...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-4 w-4" />
+                生成视频
+              </>
+            )}
+          </Button>
+
+          {/* 错误提示 */}
+          {error && (
+            <div className="p-4 rounded-md bg-destructive/10 border border-destructive/20">
+              <p className="text-sm text-destructive font-medium">{error}</p>
+            </div>
+          )}
+
+          {/* 进度显示 */}
+          {loading && (
+            <div className="space-y-3 p-4 rounded-md bg-blue-50 border border-blue-200">
+              {/* 进度条 */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-blue-800 font-medium">
+                    {getCurrentStageLabel()}
+                  </span>
+                  <span className="text-blue-600">
+                    {Math.round(progress)}%
+                  </span>
+                </div>
+                <Progress value={progress} className="h-2" />
+              </div>
+
+              {/* 时间和提示 */}
+              <div className="flex justify-between items-center text-xs text-blue-700">
+                <span>已用时：{formatTime(elapsedTime)}</span>
+                <span>预计需要 5-6 分钟</span>
+              </div>
+
+              {/* 友好提示 */}
+              <p className="text-xs text-blue-600 mt-2">
+                💡 提示：视频生成需要一定时间，请耐心等待。您可以在此期间浏览其他页面。
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 视频播放器 - 生成成功后显示 */}
+      {videoResult && (
+        <VideoPlayer
+          videoUrl={videoResult.video_url}
+          category={videoResult.category}
+        />
+      )}
+    </div>
+  )
