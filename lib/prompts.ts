@@ -82,7 +82,7 @@ PHASE 2.5 - Particle Fade Out (2.8-3.2 seconds):
 - Food remains assembled and clearly visible without particle obstruction
 - Lighting returns to normal food photography lighting
 
-PHASE 3 - Food Deconstruction (3.2-8 seconds):
+PHASE 3 - Food Deconstruction (3.2-6 seconds):
 - NO golden particles present (they have completely faded out)
 - Food now begins separating into exploded layer view
 - Ingredients begin separating vertically in their natural stacking order
@@ -92,8 +92,20 @@ PHASE 3 - Food Deconstruction (3.2-8 seconds):
 - Gaps between layers gradually increase from 0cm to 2-5cm final spacing
 - All layers maintain perfect vertical center alignment throughout separation
 - Clean, clear exploded view without any particle effects
-- By 8 seconds, all ingredients reach final floating positions in exploded diagram
+- By 6 seconds, all ingredients reach final floating positions in exploded diagram
 - Gentle floating motion - each layer bobbing slightly (±1-2mm) as if suspended in air
+
+PHASE 4 - Food Reassembly (6-8 seconds):
+- All separated layers begin smoothly moving back together
+- Layers descend and converge back to their original assembled positions
+- Top layers move down first, followed by middle layers, creating reverse cascading effect
+- Each layer moves with smooth ease-in-ease-out motion (not sudden drops)
+- Gaps between layers gradually decrease from 2-5cm back to 0cm (fully assembled)
+- All layers maintain perfect vertical center alignment during reassembly
+- Movement speed increases slightly as layers approach their final positions (gentle acceleration)
+- By 8 seconds, food is completely reassembled into its original whole form
+- Final assembled state matches the starting appearance (first frame)
+- Food settles gently with subtle bounce/settling motion upon full reassembly
 
 INGREDIENT-SPECIFIC MOTION DYNAMICS:
 
@@ -211,10 +223,11 @@ STRICT RULES - DO NOT:
 - Golden particles must be PURE GOLDEN YELLOW only (no other colors)
 
 FINAL RESULT:
-A cinematic 8-second animation with three distinct phases:
+A cinematic 8-second animation with four distinct phases:
 1. Fast forward zoom from medium distance to extreme close-up (0-2 sec)
 2. Golden magical particles appear and orbit above the assembled food, creating a premium glow effect (2-3.2 sec), then gracefully fade out
-3. Clean food deconstruction into exploded diagram view with ingredients separating into floating layers (3.2-8 sec), with subtle oil droplets but NO golden particles
+3. Clean food deconstruction into exploded diagram view with ingredients separating into floating layers (3.2-6 sec)
+4. Food reassembly where all layers smoothly move back together, reforming the complete dish (6-8 sec)
 
 The golden particles ONLY appear during the assembled food phase (first image), creating maximum visual impact on the complete dish. The exploded view (final image) remains clean and educational without particle obstruction, clearly showing the layered ingredients. This creates a visually stunning food advertisement with Hollywood-level production quality.`
 }

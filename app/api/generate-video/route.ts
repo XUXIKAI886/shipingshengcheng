@@ -10,34 +10,6 @@ import { VEO_API_CONFIG, VIDEO_SPECS } from '@/lib/prompts'
 import { VideoResult, VideoErrorType } from '@/types/video'
 
 /**
- * 将 Base64 图片上传到 Imgur 图床
- * Imgur 是一个可靠的免费图床，Veo API 可以访问
- */
-async function uploadBase64ToImgur(base64Data: string): Promise<string> {
-  // 移除 data:image/xxx;base64, 前缀
-  const base64Image = base64Data.replace(/^data:image\/\w+;base64,/, '')
-
-  // 使用 Imgur API
-  const formData = new FormData()
-  formData.append('image', base64Image)
-
-  const response = await fetch('https://api.imgur.com/3/image', {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Client-ID 546c25a59c58ad7', // Imgur 公共客户端ID
-    },
-    body: formData
-  })
-
-  if (!response.ok) {
-    throw new Error('图片上传失败')
-  }
-
-  const data = await response.json()
-  return data.data.link
-}
-
-/**
  * POST /api/generate-video
  *
  * 接收前端请求，调用云雾 Sora API 生成视频
@@ -64,66 +36,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 2. 检测并处理 Base64 图片
+    // 2. 直接使用 Base64 图片（不再上传到图床）
     if (imageUrl && imageUrl.startsWith('data:image/')) {
-      console.log('检测到 Base64 图片，正在上传到 Imgur 图床...')
-      try {
-        imageUrl = await uploadBase64ToImgur(imageUrl)
-        console.log('图片上传成功 (Imgur):', imageUrl)
-      } catch (err) {
-        console.error('图片上传失败:', err)
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              type: VideoErrorType.API_ERROR,
-              message: '图片处理失败，请重试',
-            },
-          },
-          { status: 500 }
-        )
-      }
+      console.log('检测到 Base64 图片，直接使用')
     }
 
-    // 3. 处理首尾帧图片的 Base64 编码
+    // 3. 直接使用首尾帧 Base64 图片
     if (headImageUrl && headImageUrl.startsWith('data:image/')) {
-      console.log('检测到首图 Base64，正在上传到 Imgur 图床...')
-      try {
-        headImageUrl = await uploadBase64ToImgur(headImageUrl)
-        console.log('首图上传成功 (Imgur):', headImageUrl)
-      } catch (err) {
-        console.error('首图上传失败:', err)
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              type: VideoErrorType.API_ERROR,
-              message: '首图处理失败，请重试',
-            },
-          },
-          { status: 500 }
-        )
-      }
+      console.log('检测到首图 Base64，直接使用')
     }
 
     if (tailImageUrl && tailImageUrl.startsWith('data:image/')) {
-      console.log('检测到尾图 Base64，正在上传到 Imgur 图床...')
-      try {
-        tailImageUrl = await uploadBase64ToImgur(tailImageUrl)
-        console.log('尾图上传成功 (Imgur):', tailImageUrl)
-      } catch (err) {
-        console.error('尾图上传失败:', err)
-        return NextResponse.json(
-          {
-            success: false,
-            error: {
-              type: VideoErrorType.API_ERROR,
-              message: '尾图处理失败，请重试',
-            },
-          },
-          { status: 500 }
-        )
-      }
+      console.log('检测到尾图 Base64，直接使用')
     }
 
     // 确定生成模式
@@ -200,10 +124,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 7. 如果是异步任务，需要轮询（queued、pending、processing、prompt_enhancement_checking 都需要等待）
+    // 7. 如果是异步任务，需要轮询（queued、pending、processing、prompt_enhancing、prompt_enhancement_checking 都需要等待）
     if (veoData.status === 'queued' ||
         veoData.status === 'pending' ||
         veoData.status === 'processing' ||
+        veoData.status === 'prompt_enhancing' ||
         veoData.status === 'prompt_enhancement_checking') {
       console.log(`任务状态: ${veoData.status}, 开始轮询...`)
       // 实现轮询逻辑
@@ -342,11 +267,11 @@ async function pollVideoStatus(taskId: string): Promise<string | null> {
       // 等待指定时间
       await new Promise((resolve) => setTimeout(resolve, pollInterval))
 
-      // 查询任务状态 - 尝试多种可能的 API 端点
+      // 查询任务状态 - 使用正确的 API 端点
       const endpoints = [
-        `${VEO_API_CONFIG.baseURL}/videos/${taskId}`,
         `${VEO_API_CONFIG.baseURL}/video/status/${taskId}`,
         `${VEO_API_CONFIG.baseURL}/video/${taskId}`,
+        `${VEO_API_CONFIG.baseURL}/videos/${taskId}`,
       ]
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

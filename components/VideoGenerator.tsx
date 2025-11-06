@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Loader2, Sparkles, ImageIcon } from 'lucide-react'
+import { Loader2, Sparkles, ImageIcon, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,7 +20,7 @@ import type { VideoResult } from '@/types/video'
 
 export function VideoGenerator() {
   // 状态管理
-  const [mode, setMode] = useState<'text' | 'image' | 'firstLast'>('text') // 生成模式
+  const [mode, setMode] = useState<'text' | 'image' | 'firstLast'>('firstLast') // 生成模式
   const [category, setCategory] = useState('')
   const [dishName, setDishName] = useState('') // 主推菜品名称
   const [optimizedPrompt, setOptimizedPrompt] = useState('') // Coze 优化后的 Prompt
@@ -282,17 +282,17 @@ export function VideoGenerator() {
           {/* 模式切换 Tabs */}
           <Tabs value={mode} onValueChange={(value) => setMode(value as 'text' | 'image' | 'firstLast')} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="text" className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                文字生成
+              <TabsTrigger value="firstLast" className="flex items-center gap-2">
+                <Layers className="h-4 w-4" />
+                首尾帧生成
               </TabsTrigger>
               <TabsTrigger value="image" className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
                 图片生成
               </TabsTrigger>
-              <TabsTrigger value="firstLast" className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4" />
-                首尾帧生成
+              <TabsTrigger value="text" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                文字生成
               </TabsTrigger>
             </TabsList>
 
@@ -395,14 +395,7 @@ export function VideoGenerator() {
                   </p>
                 </div>
 
-                {/* 显示首图预览 */}
-                {headImageUrl && (
-                  <div className="p-4 rounded-md bg-green-50 border border-green-200">
-                    <p className="text-sm font-medium text-green-900 mb-2">✅ 首图已上传</p>
-                    <img src={headImageUrl} alt="首图预览" className="w-full max-w-md rounded-md" />
-                  </div>
-                )}
-
+  
                 {/* 生成尾图按钮 */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
@@ -428,7 +421,7 @@ export function VideoGenerator() {
                     )}
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    AI 将基于首图生成电影级特效尾图（热气、金色粒子、专业打光）
+                    AI 将基于首图生成尾图
                   </p>
                 </div>
 

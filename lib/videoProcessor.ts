@@ -135,6 +135,86 @@ export async function resizeVideo(
 }
 
 /**
+ * 给视频添加水印
+ *
+ * @param videoUrl - 原始视频 URL
+ * @param watermarkText - 水印文字
+ * @param onProgress - 进度回调 (0-100)
+ * @returns 带水印的视频 Blob URL
+ */
+export async function addWatermarkToVideo(
+  videoUrl: string,
+  watermarkText: string,
+  onProgress?: (progress: number, status: string) => void
+): Promise<string> {
+  try {
+    // 1. 加载 FFmpeg
+    if (onProgress) onProgress(0, '正在加载视频处理工具...')
+    const ffmpeg = await loadFFmpeg((p) => {
+      if (onProgress && p < 20) {
+        onProgress(p, '正在加载视频处理工具...')
+      }
+    })
+
+    // 2. 获取原始视频文件
+    if (onProgress) onProgress(20, '正在下载原始视频...')
+    const videoData = await fetchFile(videoUrl)
+
+    // 3. 写入 FFmpeg 虚拟文件系统
+    if (onProgress) onProgress(30, '正在准备视频文件...')
+    await ffmpeg.writeFile('input.mp4', videoData)
+
+    // 4. 创建水印文字
+    if (onProgress) onProgress(40, '正在生成水印...')
+
+    // 使用 FFmpeg 的 drawtext 滤镜添加文字水印
+    // 参数说明：
+    // - fontfile: 字体文件（使用系统默认字体）
+    // - text: 水印文字
+    // - fontsize: 字体大小
+    // - fontcolor: 字体颜色（白色半透明）
+    // - x, y: 水印位置（右下角）
+    // - shadow: 文字阴影，增强可读性
+    const watermarkFilter = `drawtext=text='${watermarkText}':fontsize=24:fontcolor=white@0.7:x=w-tw-10:y=h-th-10:shadowx=2:shadowy=2:shadowcolor=black@0.5`
+
+    // 5. 执行视频水印处理
+    if (onProgress) onProgress(50, '正在添加水印...')
+
+    await ffmpeg.exec([
+      '-i', 'input.mp4',
+      '-vf', watermarkFilter,
+      '-c:v', 'libx264',
+      '-preset', 'fast',
+      '-crf', '18',
+      '-c:a', 'copy',
+      'output_watermarked.mp4'
+    ])
+
+    // 6. 读取处理后的视频
+    if (onProgress) onProgress(90, '正在生成下载文件...')
+    const data = await ffmpeg.readFile('output_watermarked.mp4')
+
+    // 7. 创建 Blob URL
+    const blob = new Blob([data], { type: 'video/mp4' })
+    const blobUrl = URL.createObjectURL(blob)
+
+    // 8. 清理虚拟文件系统
+    try {
+      await ffmpeg.deleteFile('input.mp4')
+      await ffmpeg.deleteFile('output_watermarked.mp4')
+    } catch (e) {
+      console.warn('清理临时文件失败:', e)
+    }
+
+    if (onProgress) onProgress(100, '水印添加完成！')
+    return blobUrl
+  } catch (error) {
+    console.error('水印添加失败:', error)
+    throw new Error('视频水印添加失败，请重试')
+  }
+}
+
+/**
  * 下载处理后的视频
  *
  * @param blobUrl - 视频 Blob URL
