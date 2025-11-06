@@ -5,7 +5,7 @@
  */
 
 import { VideoResult, VideoErrorType, ApiResponse } from '@/types/video'
-import { VIDEO_PROMPT_TEMPLATE, IMAGE_TO_VIDEO_PROMPT, FIRST_LAST_FRAME_VIDEO_PROMPT, validateCategory } from './prompts'
+import { VIDEO_PROMPT_TEMPLATE, IMAGE_TO_VIDEO_PROMPT, FIRST_LAST_FRAME_VIDEO_PROMPT, MODEL_SHOWCASE_VIDEO_PROMPT, validateCategory } from './prompts'
 
 /**
  * 生成视频
@@ -38,11 +38,12 @@ export async function generateVideo(
   imageUrl?: string,
   customPrompt?: string,
   headImageUrl?: string,
-  tailImageUrl?: string
+  tailImageUrl?: string,
+  clothingImageUrl?: string
 ): Promise<VideoResult> {
   // 1. 验证：至少提供一种模式
-  if (!category && !imageUrl && !headImageUrl) {
-    throw new Error('请提供品类、图片或首尾帧图片')
+  if (!category && !imageUrl && !headImageUrl && !clothingImageUrl) {
+    throw new Error('请提供品类、图片、首尾帧图片或服装图片')
   }
 
   // 2. 首尾帧模式验证
@@ -65,7 +66,9 @@ export async function generateVideo(
       ? IMAGE_TO_VIDEO_PROMPT() // 图片生成模式
       : headImageUrl
         ? FIRST_LAST_FRAME_VIDEO_PROMPT() // 首尾帧模式使用专用提示词
-        : VIDEO_PROMPT_TEMPLATE(category!) // 文字生成模式
+        : clothingImageUrl
+          ? MODEL_SHOWCASE_VIDEO_PROMPT() // 模特展示模式使用专用提示词
+          : VIDEO_PROMPT_TEMPLATE(category!) // 文字生成模式
 
   try {
     // 5. 调用后端 API 路由
@@ -80,6 +83,7 @@ export async function generateVideo(
         imageUrl,
         headImageUrl,
         tailImageUrl,
+        clothingImageUrl,
       }),
     })
 

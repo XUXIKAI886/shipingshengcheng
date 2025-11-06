@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Loader2, Sparkles, ImageIcon, Layers } from 'lucide-react'
+import { Loader2, Sparkles, ImageIcon, Layers, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,7 +20,7 @@ import type { VideoResult } from '@/types/video'
 
 export function VideoGenerator() {
   // 状态管理
-  const [mode, setMode] = useState<'text' | 'image' | 'firstLast'>('firstLast') // 生成模式
+  const [mode, setMode] = useState<'text' | 'image' | 'firstLast' | 'model'>('firstLast') // 生成模式
   const [category, setCategory] = useState('')
   const [dishName, setDishName] = useState('') // 主推菜品名称
   const [optimizedPrompt, setOptimizedPrompt] = useState('') // Coze 优化后的 Prompt
@@ -29,6 +29,7 @@ export function VideoGenerator() {
   const [headImageUrl, setHeadImageUrl] = useState<string | null>(null) // 首图URL（首尾帧模式）
   const [tailImageUrl, setTailImageUrl] = useState<string | null>(null) // 尾图URL（首尾帧模式）
   const [generatingTailImage, setGeneratingTailImage] = useState(false) // 正在生成尾图
+  const [clothingImageUrl, setClothingImageUrl] = useState<string | null>(null) // 服装图片URL（模特展示模式）
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [videoResult, setVideoResult] = useState<VideoResult | null>(null)
@@ -233,6 +234,11 @@ export function VideoGenerator() {
       }
     }
 
+    if (mode === 'model' && !clothingImageUrl) {
+      setError('请先上传服装图片')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -242,7 +248,8 @@ export function VideoGenerator() {
         mode === 'image' ? (imageUrl || undefined) : undefined,
         mode === 'text' ? optimizedPrompt : undefined, // 使用优化后的 Prompt
         mode === 'firstLast' ? headImageUrl : undefined, // 首图
-        mode === 'firstLast' ? tailImageUrl : undefined // 尾图
+        mode === 'firstLast' ? tailImageUrl : undefined, // 尾图
+        mode === 'model' ? (clothingImageUrl || undefined) : undefined // 服装图片
       )
       setProgress(100) // 完成时设为100%
       setVideoResult(result)
@@ -280,8 +287,8 @@ export function VideoGenerator() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 模式切换 Tabs */}
-          <Tabs value={mode} onValueChange={(value) => setMode(value as 'text' | 'image' | 'firstLast')} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs value={mode} onValueChange={(value) => setMode(value as 'text' | 'image' | 'firstLast' | 'model')} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="firstLast" className="flex items-center gap-2">
                 <Layers className="h-4 w-4" />
                 首尾帧生成
@@ -293,6 +300,10 @@ export function VideoGenerator() {
               <TabsTrigger value="text" className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
                 文字生成
+              </TabsTrigger>
+              <TabsTrigger value="model" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                模特展示
               </TabsTrigger>
             </TabsList>
 
@@ -360,6 +371,22 @@ export function VideoGenerator() {
                   <p className="text-sm text-blue-800 whitespace-pre-wrap">{optimizedPrompt}</p>
                 </div>
               )}
+            </TabsContent>
+
+            {/* 模特展示模式 */}
+            <TabsContent value="model" className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  上传服装图片
+                </label>
+                <ImageUpload
+                  onImageUploaded={(url) => setClothingImageUrl(url)}
+                  maxSizeMB={5}
+                />
+                <p className="text-xs text-muted-foreground">
+                  上传模特穿着的服装图片，AI将生成专业时装秀展示视频：远景展示整体造型，近景突出服装细节，侧面和转身展示立体效果，高端大气的专业走秀风格
+                </p>
+              </div>
             </TabsContent>
 
             {/* 图片生成模式 */}
@@ -460,7 +487,8 @@ export function VideoGenerator() {
               loading ||
               (mode === 'text' && !category.trim()) ||
               (mode === 'image' && !imageUrl) ||
-              (mode === 'firstLast' && (!headImageUrl || !tailImageUrl))
+              (mode === 'firstLast' && (!headImageUrl || !tailImageUrl)) ||
+              (mode === 'model' && !clothingImageUrl)
             }
             className="w-full"
             size="lg"

@@ -8,6 +8,90 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { VEO_API_CONFIG, VIDEO_SPECS } from '@/lib/prompts'
 import { VideoResult, VideoErrorType } from '@/types/video'
+import sharp from 'sharp'
+
+/**
+ * 压缩 Base64 图片
+ *
+ * @param base64Data - Base64 编码的图片数据
+ * @param maxWidth - 最大宽度（默认 1920px）
+ * @param quality - 压缩质量 0-100（默认 80）
+ * @returns 压缩后的 Base64 数据
+ */
+async function compressBase64Image(
+  base64Data: string,
+  maxWidth: number = 1920,
+  quality: number = 80
+): Promise<string> {
+  try {
+    // 提取 MIME 类型和 Base64 数据
+    const matches = base64Data.match(/^data:image\/(\w+);base64,(.+)$/)
+    if (!matches) {
+      throw new Error('无效的 Base64 图片格式')
+    }
+
+    const mimeType = matches[1] // jpeg, png, webp 等
+    const base64Image = matches[2]
+
+    // 将 Base64 转换为 Buffer
+    const buffer = Buffer.from(base64Image, 'base64')
+
+    console.log(`原始图片大小: ${(buffer.length / 1024).toFixed(2)} KB`)
+
+    // 使用 sharp 压缩图片
+    const compressedBuffer = await sharp(buffer)
+      .resize(maxWidth, null, {
+        // 保持宽高比，只限制最大宽度
+        fit: 'inside',
+        withoutEnlargement: true, // 不放大小图
+      })
+      .jpeg({
+        quality: quality,
+        progressive: true,
+        mozjpeg: true, // 使用 mozjpeg 获得更好的压缩率
+      })
+      .toBuffer()
+
+    console.log(`压缩后图片大小: ${(compressedBuffer.length / 1024).toFixed(2)} KB`)
+    console.log(`压缩率: ${((1 - compressedBuffer.length / buffer.length) * 100).toFixed(1)}%`)
+
+    // 转换回 Base64
+    const compressedBase64 = compressedBuffer.toString('base64')
+    return `data:image/jpeg;base64,${compressedBase64}`
+  } catch (error) {
+    console.error('图片压缩失败:', error)
+    // 压缩失败时返回原图
+    return base64Data
+  }
+}
+
+/**
+ * 将 Base64 图片上传到 Imgur 图床
+ * Imgur 是一个可靠的免费图床，Veo API 可以访问
+ */
+async function uploadBase64ToImgur(base64Data: string): Promise<string> {
+  // 移除 data:image/xxx;base64, 前缀
+  const base64Image = base64Data.replace(/^data:image\/\w+;base64,/, '')
+
+  // 使用 Imgur API
+  const formData = new FormData()
+  formData.append('image', base64Image)
+
+  const response = await fetch('https://api.imgur.com/3/image', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Client-ID 546c25a59c58ad7', // Imgur 公共客户端ID
+    },
+    body: formData
+  })
+
+  if (!response.ok) {
+    throw new Error('图片上传失败')
+  }
+
+  const data = await response.json()
+  return data.data.link
+}
 
 /**
  * POST /api/generate-video
@@ -22,41 +106,132 @@ export async function POST(request: NextRequest) {
     let imageUrl = body.imageUrl // 使用 let 允许重新赋值
     let headImageUrl = body.headImageUrl // 首图
     let tailImageUrl = body.tailImageUrl // 尾图
+    let clothingImageUrl = body.clothingImageUrl // 服装图片
 
-    if (!prompt || (!category && !imageUrl && !headImageUrl)) {
+    if (!prompt || (!category && !imageUrl && !headImageUrl && !clothingImageUrl)) {
       return NextResponse.json(
         {
           success: false,
           error: {
             type: VideoErrorType.VALIDATION_ERROR,
-            message: '缺少必要参数：prompt 或 category/imageUrl/headImageUrl',
+            message: '缺少必要参数：prompt 或 category/imageUrl/headImageUrl/clothingImageUrl',
           },
         },
         { status: 400 }
       )
     }
 
-    // 2. 直接使用 Base64 图片（不再上传到图床）
+    // 2. 将 Base64 图片上传到图床获取 URL
     if (imageUrl && imageUrl.startsWith('data:image/')) {
-      console.log('检测到 Base64 图片，直接使用')
+      console.log('检测到 Base64 图片，开始压缩...')
+      try {
+        // 压缩图片
+        const compressedImage = await compressBase64Image(imageUrl, 1920, 80)
+
+        // 上传到 Imgur
+        console.log('压缩完成，正在上传到 Imgur 图床...')
+        imageUrl = await uploadBase64ToImgur(compressedImage)
+        console.log('图片上传成功 (Imgur):', imageUrl)
+      } catch (err) {
+        console.error('图片处理失败:', err)
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              type: VideoErrorType.API_ERROR,
+              message: '图片处理失败，请重试',
+            },
+          },
+          { status: 500 }
+        )
+      }
     }
 
-    // 3. 直接使用首尾帧 Base64 图片
+    // 3. 将首尾帧 Base64 图片上传到图床
     if (headImageUrl && headImageUrl.startsWith('data:image/')) {
-      console.log('检测到首图 Base64，直接使用')
+      console.log('检测到首图 Base64，开始压缩...')
+      try {
+        // 压缩首图
+        const compressedHeadImage = await compressBase64Image(headImageUrl, 1920, 80)
+
+        // 上传到 Imgur
+        console.log('首图压缩完成，正在上传到 Imgur 图床...')
+        headImageUrl = await uploadBase64ToImgur(compressedHeadImage)
+        console.log('首图上传成功 (Imgur):', headImageUrl)
+      } catch (err) {
+        console.error('首图处理失败:', err)
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              type: VideoErrorType.API_ERROR,
+              message: '首图处理失败，请重试',
+            },
+          },
+          { status: 500 }
+        )
+      }
     }
 
     if (tailImageUrl && tailImageUrl.startsWith('data:image/')) {
-      console.log('检测到尾图 Base64，直接使用')
+      console.log('检测到尾图 Base64，开始压缩...')
+      try {
+        // 压缩尾图
+        const compressedTailImage = await compressBase64Image(tailImageUrl, 1920, 80)
+
+        // 上传到 Imgur
+        console.log('尾图压缩完成，正在上传到 Imgur 图床...')
+        tailImageUrl = await uploadBase64ToImgur(compressedTailImage)
+        console.log('尾图上传成功 (Imgur):', tailImageUrl)
+      } catch (err) {
+        console.error('尾图处理失败:', err)
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              type: VideoErrorType.API_ERROR,
+              message: '尾图处理失败，请重试',
+            },
+          },
+          { status: 500 }
+        )
+      }
+    }
+
+    // 3. 将 Base64 服装图片上传到图床获取 URL
+    if (clothingImageUrl && clothingImageUrl.startsWith('data:image/')) {
+      console.log('检测到 Base64 服装图片，开始压缩...')
+      try {
+        // 压缩图片
+        const compressedClothingImage = await compressBase64Image(clothingImageUrl, 1920, 80)
+
+        // 上传到 Imgur
+        console.log('服装图片压缩完成，正在上传到 Imgur 图床...')
+        clothingImageUrl = await uploadBase64ToImgur(compressedClothingImage)
+        console.log('服装图片上传成功 (Imgur):', clothingImageUrl)
+      } catch (err) {
+        console.error('服装图片处理失败:', err)
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              type: VideoErrorType.API_ERROR,
+              message: '服装图片处理失败，请重试',
+            },
+          },
+          { status: 500 }
+        )
+      }
     }
 
     // 确定生成模式
-    const mode = headImageUrl ? '首尾帧生成' : (imageUrl ? '图片生成' : '文字生成')
+    const mode = headImageUrl ? '首尾帧生成' : (imageUrl ? '图片生成' : (clothingImageUrl ? '模特展示' : '文字生成'))
     console.log('开始生成视频，模式:', mode)
     console.log('品类:', category || `(${mode})`)
     console.log('图片URL:', imageUrl || '(无)')
     console.log('首图URL:', headImageUrl || '(无)')
     console.log('尾图URL:', tailImageUrl || '(无)')
+    console.log('服装图片URL:', clothingImageUrl || '(无)')
     console.log('提示词:', prompt)
 
     // 4. 准备图片数组
@@ -67,9 +242,17 @@ export async function POST(request: NextRequest) {
     } else if (imageUrl) {
       // 图片生成模式：传递单张图片
       images = [imageUrl]
+    } else if (clothingImageUrl) {
+      // 模特展示模式：传递服装图片
+      images = [clothingImageUrl]
     }
 
-    // 5. 调用云雾 Veo API
+    // 5. 根据模式确定宽高比
+    // 模特展示模式使用竖屏 9:16，其他模式使用横屏 16:9
+    const aspectRatio = clothingImageUrl ? '9:16' : VIDEO_SPECS.aspectRatio
+    console.log('视频宽高比:', aspectRatio)
+
+    // 6. 调用云雾 Veo API
     const veoResponse = await fetch(`${VEO_API_CONFIG.baseURL}${VEO_API_CONFIG.endpoint}`, {
       method: 'POST',
       headers: {
@@ -80,7 +263,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model: VEO_API_CONFIG.model,
         prompt: prompt,
-        aspect_ratio: VIDEO_SPECS.aspectRatio, // Veo 使用宽高比
+        aspect_ratio: aspectRatio, // 模特展示: 9:16 竖屏，其他: 16:9 横屏
         enhance_prompt: VIDEO_SPECS.enhancePrompt, // 自动将中文转英文
         enable_upsample: VIDEO_SPECS.enableUpsample, // 超采样（可选）
         images: images, // 图片URL数组（单图或首尾帧）
@@ -259,7 +442,7 @@ export async function POST(request: NextRequest) {
  * @returns Promise<string | null> - 视频URL，如果超时则返回 null
  */
 async function pollVideoStatus(taskId: string): Promise<string | null> {
-  const maxAttempts = 120 // 最多轮询120次（10分钟）
+  const maxAttempts = 240 // 最多轮询240次（20分钟）
   const pollInterval = 5000 // 每5秒轮询一次
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {

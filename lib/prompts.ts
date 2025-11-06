@@ -294,6 +294,170 @@ FOCUS ON: Dynamic motion, rich atmospheric effects, premium commercial food adve
 }
 
 /**
+ * 模特展示视频提示词模板
+ * 生成模特走路展示服装的视频，严格保持服装完整性和物理一致性
+ *
+ * @returns 模特展示的视频生成提示词
+ *
+ * @example
+ * ```ts
+ * const prompt = MODEL_SHOWCASE_VIDEO_PROMPT()
+ * // 配合服装图片使用，生成模特走路展示视频
+ * ```
+ */
+export const MODEL_SHOWCASE_VIDEO_PROMPT = (): string => {
+  return `Create a simple, natural fashion model walking video featuring the EXACT clothing and accessories shown in the uploaded image. The model should walk naturally to showcase the outfit. The video must maintain 100% consistency with the original outfit throughout all 8 seconds - NO changes, additions, or removals of any clothing items or accessories.
+
+CRITICAL REQUIREMENTS - ABSOLUTE RULES:
+
+1. CLOTHING CONSISTENCY (MANDATORY):
+   - The outfit MUST remain EXACTLY as shown in the uploaded image
+   - ZERO changes to clothing design, color, pattern, or style
+   - All garments visible in the image must stay visible throughout the video
+   - NO adding new clothing items not present in the original image
+   - NO removing any clothing items shown in the original image
+   - NO changing fabric patterns, colors, or textures
+   - The same exact outfit from start to finish (0-8 seconds)
+
+2. ACCESSORIES CONSISTENCY (MANDATORY):
+   - ALL accessories (bags, jewelry, scarves, hats, belts, etc.) MUST remain in their original positions
+   - Handbags, purses, or bags MUST stay firmly held or worn - they CANNOT fall, drop, or disappear
+   - Jewelry must stay in place - no falling earrings, necklaces, or bracelets
+   - Scarves, belts, and other accessories must maintain their original arrangement
+   - Physical consistency: accessories obey gravity and stay attached/held throughout
+
+3. FULL BODY VISIBILITY (MANDATORY):
+   - ALWAYS show the COMPLETE model from HEAD to FEET
+   - The model's head, face, torso, arms, legs, and feet must ALL be visible in wide shots
+   - NO cropping off the head, legs, or feet in full-body shots
+   - Ensure the entire outfit is visible from top to bottom
+   - Camera framing must include the complete figure in establishing shots
+
+VIDEO CONCEPT:
+Create a simple, natural 8-second video of a model walking to showcase the EXACT outfit from the uploaded image. The model walks naturally in a straight line, allowing viewers to see how the clothing looks in motion. The style should be clean, natural, and realistic - like a casual fashion lookbook or street style video, optimized for vertical mobile viewing (Instagram Reels, TikTok, Douyin).
+
+VIDEO ORIENTATION:
+- VERTICAL 9:16 portrait format (1080x1920 pixels)
+- Optimized for mobile viewing and social media platforms
+- Perfect for full-body fashion showcase in vertical frame
+- Model fills the vertical frame naturally from head to feet
+
+8-SECOND VIDEO STRUCTURE - SIMPLE WALKING SHOWCASE:
+
+ENTIRE VIDEO (0-8 seconds) - Continuous Natural Walking:
+- Model walks naturally in a straight line toward or past the camera
+- COMPLETE full body visible from HEAD to FEET throughout the entire video
+- VERTICAL 9:16 frame captures the model's full height at all times
+- Model wears the EXACT same outfit as shown in the uploaded image
+- NO clothing changes, NO additions, NO removals at any point
+- Walking pace: natural, relaxed, confident stride (not too fast, not too slow)
+- Camera follows the model smoothly or remains stationary as model walks
+- Clean, simple background (neutral studio or minimal environment)
+- Natural, even lighting throughout
+
+WALKING DETAILS:
+- Model walks in a straight line (toward camera, away from camera, or across frame)
+- Arms swing naturally at sides or one hand may hold accessories (bag, etc.)
+- If holding a bag or accessory, it stays firmly in hand throughout - NO dropping
+- Natural facial expression: neutral, slight smile, or confident look
+- Eyes may look at camera or straight ahead naturally
+- Posture: upright, confident, relaxed
+- Clothing moves naturally with walking motion (fabric sways, drapes naturally)
+- All accessories stay in their original positions throughout the walk
+
+CAMERA WORK:
+- Simple, clean camera work - either:
+  Option A: Stationary camera, model walks toward/past it
+  Option B: Camera slowly follows model as they walk
+- NO rapid movements, NO dramatic zooms, NO complex camera tricks
+- Smooth, steady motion throughout
+- VERTICAL 9:16 framing maintained at all times
+- Model always centered or slightly off-center in frame
+- Full body (head to feet) visible throughout entire 8 seconds
+
+MODEL PERFORMANCE REQUIREMENTS:
+- Natural, relaxed walking - not runway strutting, just normal confident walking
+- Upright posture but not stiff - natural and comfortable
+- Arms swing naturally or one hand holds accessories naturally
+- If holding accessories (bags, etc.), maintain firm, natural grip throughout the walk
+- Facial expression: natural, relaxed, slight smile or neutral
+- Eyes look forward naturally or occasionally at camera
+- Walking speed: moderate, natural pace (not too fast, not too slow)
+- Body language: confident but casual, approachable
+
+CAMERA MOVEMENT RULES:
+- Simple, clean camera work - stationary or slow follow
+- NO rapid pans, zooms, or jerky motions
+- NO dramatic camera movements or tricks
+- VERTICAL 9:16 portrait orientation (1080x1920 pixels)
+- Vertical framing perfectly captures model from head to feet throughout
+- Camera either stays still or follows model smoothly
+- Professional gimbal-stabilized motion
+- Mobile-first vertical composition
+- Keep it simple and natural
+
+LIGHTING SETUP:
+- Natural, even lighting throughout
+- Soft, flattering light that shows clothing clearly
+- NO harsh shadows or dramatic lighting
+- True-to-life color reproduction - no color shifts
+- Bright enough to show all garment details clearly
+- Consistent lighting throughout the walk
+
+BACKGROUND AND ENVIRONMENT:
+- Simple, clean background - neutral studio or minimal environment
+- NO distracting elements, patterns, or busy backgrounds
+- Could be: plain white/gray studio, simple indoor space, or clean outdoor setting
+- Focus 100% on the model and clothing
+- Background should not compete with the outfit for attention
+
+PHYSICAL CONSISTENCY RULES:
+- Gravity applies naturally - fabric drapes and sways realistically as model walks
+- Accessories stay in place throughout the walk
+- NO objects floating, falling unexpectedly, or defying physics
+- Clothing moves naturally with walking motion (fabric sways, flows naturally)
+- Bags, purses, and handheld items remain firmly held during the walk
+- Jewelry stays attached and doesn't fall off
+- Natural fabric movement - not exaggerated, not frozen
+
+COLOR AND QUALITY:
+- EXACT color matching to the original image
+- High resolution with sharp details
+- Natural color grading - clean and realistic
+- NO filters that alter the original colors
+- True-to-life fabric appearance
+- Clothing looks exactly as it does in the uploaded image
+
+TECHNICAL SPECIFICATIONS:
+- Duration: exactly 8 seconds
+- Aspect Ratio: 9:16 VERTICAL portrait format (NOT 16:9 horizontal)
+- Resolution: 1080x1920 pixels (vertical mobile format)
+- Frame rate: 24-30fps for smooth, elegant motion
+- High resolution maintaining sharp detail throughout
+- Consistent exposure and white balance
+- Professional depth of field
+- Optimized for mobile viewing and social media platforms
+
+STRICT RULES - ABSOLUTELY DO NOT:
+- ❌ DO NOT change any aspect of the clothing or accessories
+- ❌ DO NOT add new clothing items not in the original image
+- ❌ DO NOT remove any clothing items shown in the original image
+- ❌ DO NOT let accessories fall, drop, or disappear during the walk
+- ❌ DO NOT crop off the model's head, legs, or feet - show full body throughout
+- ❌ DO NOT alter colors, patterns, or fabric textures
+- ❌ DO NOT show the outfit transforming or changing
+- ❌ DO NOT use dramatic, unrealistic, or exaggerated movements
+- ❌ DO NOT add text, logos, or graphic overlays
+- ❌ DO NOT use overly artistic or stylized effects
+- ❌ DO NOT do runway strutting or fashion show poses - just natural walking
+- ❌ DO NOT use complex camera movements - keep it simple
+- ❌ DO NOT zoom in to close-ups - maintain full body view throughout
+
+FINAL RESULT:
+A simple, natural 8-second VERTICAL (9:16) walking video that showcases the EXACT outfit from the uploaded image with perfect consistency throughout. The model walks naturally in a straight line, showing how the clothing looks in motion. The complete figure (head to feet) is visible throughout the entire video. The outfit remains exactly as shown in the original image - no changes, no additions, no removals. All accessories stay in place during the walk. The vertical portrait format is optimized for mobile viewing and social media platforms (Instagram Reels, TikTok, Douyin, Kuaishou, Xiaohongshu), making it perfect for fashion e-commerce, casual lookbooks, street style content, and social media fashion posts.`
+}
+
+/**
  * 验证品类输入
  *
  * @param category - 用户输入的品类

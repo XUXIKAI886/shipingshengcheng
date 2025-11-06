@@ -7,7 +7,7 @@
  */
 
 import { useState } from 'react'
-import { Download, CheckCircle2, Settings } from 'lucide-react'
+import { Download, CheckCircle2, Settings, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { downloadVideo } from '@/lib/api'
@@ -24,6 +24,47 @@ export function VideoPlayer({ videoUrl, category }: VideoPlayerProps) {
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [progressText, setProgressText] = useState('')
+  const [videoError, setVideoError] = useState<string | null>(null)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+
+  /**
+   * 处理视频加载成功
+   */
+  const handleVideoLoaded = () => {
+    setVideoLoaded(true)
+    setVideoError(null)
+    console.log('视频加载成功:', videoUrl)
+  }
+
+  /**
+   * 处理视频加载错误
+   */
+  const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    const video = e.currentTarget
+    const error = video.error
+
+    let errorMessage = '视频加载失败'
+    if (error) {
+      switch (error.code) {
+        case MediaError.MEDIA_ERR_ABORTED:
+          errorMessage = '视频加载被中止'
+          break
+        case MediaError.MEDIA_ERR_NETWORK:
+          errorMessage = '网络错误，无法加载视频'
+          break
+        case MediaError.MEDIA_ERR_DECODE:
+          errorMessage = '视频解码错误'
+          break
+        case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+          errorMessage = '不支持的视频格式或URL无效'
+          break
+      }
+    }
+
+    console.error('视频加载错误:', errorMessage, videoUrl, error)
+    setVideoError(errorMessage)
+    setVideoLoaded(false)
+  }
 
   /**
    * 处理原始下载（不调整尺寸）
@@ -132,15 +173,59 @@ export function VideoPlayer({ videoUrl, category }: VideoPlayerProps) {
       <CardContent className="space-y-4">
         {/* 视频播放器 */}
         <div className="relative aspect-video bg-black rounded-lg overflow-hidden">
-          <video
-            id="video-player"
-            src={videoUrl}
-            className="w-full h-full"
-            controls
-            preload="metadata"
-          >
-            您的浏览器不支持视频播放
-          </video>
+          {videoError ? (
+            // 显示错误信息
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-50 text-red-700 p-4">
+              <p className="text-lg font-semibold mb-2">⚠️ {videoError}</p>
+              <p className="text-sm text-center mb-4">
+                视频URL: <code className="text-xs bg-red-100 px-2 py-1 rounded">{videoUrl}</code>
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    setVideoError(null)
+                    // 强制重新加载视频
+                    const video = document.getElementById('video-player') as HTMLVideoElement
+                    if (video) {
+                      video.load()
+                    }
+                  }}
+                  size="sm"
+                  variant="outline"
+                >
+                  重试
+                </Button>
+                <Button
+                  onClick={handleDownload}
+                  size="sm"
+                >
+                  直接下载视频
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {!videoLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-900 text-white">
+                  <Loader2 className="h-8 w-8 animate-spin mr-2" />
+                  <span>加载视频中...</span>
+                </div>
+              )}
+              <video
+                id="video-player"
+                src={videoUrl}
+                className="w-full h-full"
+                controls
+                preload="metadata"
+                crossOrigin="anonymous"
+                onLoadedData={handleVideoLoaded}
+                onError={handleVideoError}
+                playsInline
+              >
+                您的浏览器不支持视频播放
+              </video>
+            </>
+          )}
         </div>
 
         {/* 操作提示 */}
